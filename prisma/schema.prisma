@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  password_hash String
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @default(now())
+  name          String
+  role          String?        @default("user") @db.VarChar(50)
+  sessions      Session[]
+  badges        UserBadge[]
+  progress      UserProgress[]
+  streaks       UserStreak?
+
+  @@map("users")
+}
+
+model Session {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  token      String   @unique
+  expires_at DateTime
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model LearningTrack {
+  id            String   @id
+  title         String
+  description   String?
+  icon          String?
+  color         String?
+  image         String?
+  lessons_count Int      @default(10)
+  order         Int?
+  created_at    DateTime @default(now())
+  lessons       Lesson[]
+
+  @@map("learning_tracks")
+}
+
+model Lesson {
+  id          String         @id
+  track_id    String
+  title       String
+  description String?
+  content     String?
+  duration    Int?
+  order       Int?
+  created_at  DateTime       @default(now())
+  image_url   String?        @db.VarChar(500)
+  track       LearningTrack  @relation(fields: [track_id], references: [id])
+  quizzes     Quiz[]
+  progress    UserProgress[]
+
+  @@map("lessons")
+}
+
+model Quiz {
+  id              String   @id @default(cuid())
+  lesson_id       String
+  question        String
+  options         String[] // Stored as JSON array of strings
+  correct_answer  Int      // Index of the correct option
+  explanation     String?
+  order           Int?     @default(0)
+  created_at      DateTime @default(now())
+  lesson          Lesson   @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
+
+  @@map("quizzes")
+}
+
+model UserStreak {
+  id                      Int       @id @default(autoincrement())
+  user_id                 Int       @unique
+  current_streak          Int       @default(0)
+  longest_streak          Int       @default(0)
+  last_completed_date     DateTime?
+  total_lessons_completed Int       @default(0)
+  weekly_lessons_completed Int      @default(0)
+  weekly_goal             Int       @default(7)
+  weekly_reset_date       DateTime?
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  user                    User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_streaks")
+}
+
+model UserProgress {
+  id           Int       @id @default(autoincrement())
+  user_id      Int
+  lesson_id    String
+  completed    Boolean   @default(false)
+  started_at   DateTime  @default(now())
+  completed_at DateTime?
+  quiz_score   Int?
+  created_at   DateTime  @default(now())
+  lesson       Lesson    @relation(fields: [lesson_id], references: [id])
+  user         User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, lesson_id])
+  @@map("user_progress")
+}
+
+model UserBadge {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  badge_id   String
+  badge_name String
+  earned_at  DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, badge_id])
+  @@map("user_badges")
+}

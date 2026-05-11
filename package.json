@@ -1,0 +1,34 @@
+{
+  "name": "microlearn-backend",
+  "version": "1.0.0",
+  "description": "MicroLearn backend API server",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "prisma generate && next build",
+    "start": "next start -p 3000",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.9.0",
+    "@prisma/adapter-neon": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.6.1",
+    "jsonwebtoken": "^9.0.2",
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@prisma/config": "^7.8.0",
+    "@types/bcrypt": "^6.0.0",
+    "@types/bcryptjs": "^2.4.4",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "prisma": "^7.8.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.0"
+  }
+}
