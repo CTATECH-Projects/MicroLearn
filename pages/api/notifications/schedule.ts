@@ -14,13 +14,13 @@ import { processAllNotifications } from '@/lib/notifications';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Verify this is a legitimate cron call (optional but recommended)
   const cronSecret = process.env.CRON_SECRET || 'your-secret-key';
-  const providedSecret = req.headers['x-cron-secret'] || req.body?.secret;
+  const providedSecret = req.headers['x-cron-secret'] || req.query?.secret || req.body?.secret;
 
   if (process.env.NODE_ENV === 'production' && providedSecret !== cronSecret) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  if (req.method !== 'POST') {
+  if (!['POST', 'GET'].includes(req.method || '')) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
