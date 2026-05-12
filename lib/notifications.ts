@@ -1,11 +1,22 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 
 // Singleton pattern for Prisma Client
 let prisma: PrismaClient | null = null;
 
 function getPrismaClient() {
   if (!prisma) {
+    const connectionString = process.env.DATABASE_URL;
+    if (!connectionString) {
+      throw new Error('DATABASE_URL environment variable is not set');
+    }
+    
+    const pool = new Pool({ connectionString });
+    const adapter = new PrismaPg(pool);
+    
     prisma = new PrismaClient({
+      adapter,
       log: ['error', 'warn'],
     });
   }
