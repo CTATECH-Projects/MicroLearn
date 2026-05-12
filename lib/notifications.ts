@@ -5,16 +5,8 @@ let prisma: PrismaClient | null = null;
 
 function getPrismaClient() {
   if (!prisma) {
-    if (!process.env.DATABASE_URL) {
-      throw new Error('DATABASE_URL environment variable is not set');
-    }
     prisma = new PrismaClient({
       log: ['error', 'warn'],
-      datasources: {
-        db: {
-          url: process.env.DATABASE_URL,
-        },
-      },
     });
   }
   return prisma;
