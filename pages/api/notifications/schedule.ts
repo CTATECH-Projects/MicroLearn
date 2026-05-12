@@ -26,6 +26,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     console.log('[cron] Starting notification processing...');
+    console.log('[cron] Secret provided:', !!providedSecret);
+    console.log('[cron] Environment:', process.env.NODE_ENV);
+    
     const startTime = Date.now();
 
     const results = await processAllNotifications();
@@ -41,9 +44,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   } catch (error) {
     console.error('[cron] Error processing notifications:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : '';
     return res.status(500).json({
       error: 'Failed to process notifications',
-      message: error instanceof Error ? error.message : 'Unknown error',
+      message: errorMessage,
+      stack: process.env.NODE_ENV === 'development' ? errorStack : undefined,
     });
   }
 }

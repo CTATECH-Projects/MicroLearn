@@ -203,19 +203,23 @@ export async function resetNotificationStateOnLessonCompletion(userId: number, n
  */
 export async function processAllNotifications() {
   try {
-    // Get all users with notification tokens
+    console.log('[notifications] Starting processAllNotifications...');
+    
+    // Get all users with at least one push token
     const users = await prisma.user.findMany({
+      where: {
+        expo_push_tokens: {
+          some: {}
+        }
+      },
       include: {
         expo_push_tokens: true,
         streaks: true,
         notificationState: true,
       },
-      where: {
-        expo_push_tokens: {
-          some: {} // Only get users who have at least one push token
-        }
-      }
     });
+
+    console.log(`[notifications] Found ${users.length} users with push tokens`);
 
     const results = {
       processed: 0,
@@ -244,6 +248,7 @@ export async function processAllNotifications() {
       }
     }
 
+    console.log('[notifications] processAllNotifications completed:', results);
     return results;
   } catch (error) {
     console.error('[notifications] Error in processAllNotifications:', error);
