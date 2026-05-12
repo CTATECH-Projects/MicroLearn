@@ -1,6 +1,16 @@
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+// Singleton pattern for Prisma Client
+let prisma: PrismaClient;
+
+function getPrismaClient() {
+  if (!prisma) {
+    prisma = new PrismaClient({
+      log: ['error', 'warn'],
+    });
+  }
+  return prisma;
+}
 
 interface NotificationPayload {
   token: string;
@@ -43,6 +53,7 @@ export async function sendPushNotification(payload: NotificationPayload) {
  * Send daily reminder notification if user hasn't completed lesson today
  */
 export async function sendDailyReminderNotification(userId: number) {
+  const prisma = getPrismaClient();
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
@@ -112,6 +123,7 @@ export async function sendDailyReminderNotification(userId: number) {
  * Send countdown notification when next lesson is becoming available
  */
 export async function sendCountdownNotification(userId: number) {
+  const prisma = getPrismaClient();
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
@@ -174,6 +186,7 @@ export async function sendCountdownNotification(userId: number) {
  * Reset notification state when user completes a lesson
  */
 export async function resetNotificationStateOnLessonCompletion(userId: number, nextAvailableAt: Date) {
+  const prisma = getPrismaClient();
   await prisma.notificationState.upsert({
     where: { user_id: userId },
     update: {
@@ -204,6 +217,7 @@ export async function resetNotificationStateOnLessonCompletion(userId: number, n
 export async function processAllNotifications() {
   try {
     console.log('[notifications] Starting processAllNotifications...');
+    const prisma = getPrismaClient();
     
     // Get all users with at least one push token
     const users = await prisma.user.findMany({
