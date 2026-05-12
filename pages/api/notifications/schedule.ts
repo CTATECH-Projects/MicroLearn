@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { processAllNotifications } from '@/lib/notifications';
+import { processAllNotifications } from '../../lib/notifications';
 
 /**
  * Cron endpoint to process notifications

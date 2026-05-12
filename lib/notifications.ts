@@ -210,6 +210,11 @@ export async function processAllNotifications() {
         streaks: true,
         notificationState: true,
       },
+      where: {
+        expo_push_tokens: {
+          some: {} // Only get users who have at least one push token
+        }
+      }
     });
 
     const results = {
