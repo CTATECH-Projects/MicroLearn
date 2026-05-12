@@ -7,19 +7,19 @@ datasource db {
 }
 
 model User {
-  id                   Int                   @id @default(autoincrement())
-  email                String                @unique
-  password_hash        String
-  created_at           DateTime              @default(now())
-  updated_at           DateTime              @default(now())
-  name                 String
-  role                 String?               @default("user") @db.VarChar(50)
-  sessions             Session[]
-  badges               UserBadge[]
-  progress             UserProgress[]
-  streaks              UserStreak?
-  notificationState    NotificationState?
-  expo_push_tokens     ExpoPushToken[]
+  id                Int                @id @default(autoincrement())
+  email             String             @unique
+  password_hash     String
+  created_at        DateTime           @default(now())
+  updated_at        DateTime           @default(now())
+  name              String
+  role              String?            @default("user") @db.VarChar(50)
+  expo_push_tokens  ExpoPushToken[]
+  notificationState NotificationState?
+  sessions          Session[]
+  badges            UserBadge[]
+  progress          UserProgress[]
+  streaks           UserStreak?
 
   @@map("users")
 }
@@ -41,10 +41,10 @@ model LearningTrack {
   description   String?
   icon          String?
   color         String?
-  image         String?
   lessons_count Int      @default(10)
   order         Int?
   created_at    DateTime @default(now())
+  image         String?
   lessons       Lesson[]
 
   @@map("learning_tracks")
@@ -68,33 +68,33 @@ model Lesson {
 }
 
 model Quiz {
-  id              String   @id @default(cuid())
-  lesson_id       String
-  question        String
-  options         String[] // Stored as JSON array of strings
-  correct_answer  Int      // Index of the correct option
-  explanation     String?
-  order           Int?     @default(0)
-  created_at      DateTime @default(now())
-  lesson          Lesson   @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
+  id             String   @id @default(cuid())
+  lesson_id      String
+  question       String
+  options        String[]
+  correct_answer Int
+  explanation    String?
+  order          Int?     @default(0)
+  created_at     DateTime @default(now())
+  lesson         Lesson   @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
 
   @@map("quizzes")
 }
 
 model UserStreak {
-  id                      Int       @id @default(autoincrement())
-  user_id                 Int       @unique
-  current_streak          Int       @default(0)
-  longest_streak          Int       @default(0)
-  last_completed_date     DateTime?
+  id                       Int       @id @default(autoincrement())
+  user_id                  Int       @unique
+  current_streak           Int       @default(0)
+  longest_streak           Int       @default(0)
+  last_completed_date      DateTime?
+  total_lessons_completed  Int       @default(0)
+  created_at               DateTime  @default(now())
+  updated_at               DateTime  @updatedAt
+  weekly_goal              Int       @default(7)
+  weekly_lessons_completed Int       @default(0)
+  weekly_reset_date        DateTime?
   next_lesson_available_at DateTime?
-  total_lessons_completed Int       @default(0)
-  weekly_lessons_completed Int      @default(0)
-  weekly_goal             Int       @default(7)
-  weekly_reset_date       DateTime?
-  created_at              DateTime  @default(now())
-  updated_at              DateTime  @updatedAt
-  user                    User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user                     User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("user_streaks")
 }
@@ -104,10 +104,10 @@ model UserProgress {
   user_id      Int
   lesson_id    String
   completed    Boolean   @default(false)
-  started_at   DateTime  @default(now())
   completed_at DateTime?
   quiz_score   Int?
   created_at   DateTime  @default(now())
+  started_at   DateTime  @default(now())
   lesson       Lesson    @relation(fields: [lesson_id], references: [id])
   user         User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
@@ -143,12 +143,12 @@ model NotificationState {
 }
 
 model ExpoPushToken {
-  id         Int       @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   user_id    Int
-  token      String    @unique
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  token      String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("expo_push_tokens")
 }
