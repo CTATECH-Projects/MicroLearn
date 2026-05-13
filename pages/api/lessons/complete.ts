@@ -23,7 +23,6 @@ export default async function handler(
 
   try {
     const decoded = verifyToken(token);
-    // ← Add this check
     if (!decoded || !decoded.userId) {
       return res.status(401).json({ error: "Invalid token" });
     }
@@ -31,6 +30,27 @@ export default async function handler(
 
     const today = new Date().toISOString().split("T")[0];
 
+    // Check if this lesson was already completed TODAY
+    const existingProgress = await sql`
+      SELECT completed_at
+      FROM user_progress
+      WHERE user_id = ${userId} AND lesson_id = ${lessonId}
+    `;
+
+    const alreadyCompletedToday = existingProgress.length > 0 
+      ? new Date(existingProgress[0].completed_at).toISOString().split("T")[0] === today
+      : false;
+
+    // If already completed today, don't update progress or streak
+    if (alreadyCompletedToday) {
+      return res.status(200).json({
+        success: true,
+        alreadyCompleted: true,
+        message: "Lesson already completed today. No progress update.",
+      });
+    }
+
+    // First time completing this lesson - proceed with updates
     // Mark lesson as complete
     await sql`
       INSERT INTO user_progress (user_id, lesson_id, completed, completed_at, quiz_score)
@@ -118,6 +138,7 @@ export default async function handler(
 
     return res.status(200).json({
       success: true,
+      alreadyCompleted: false,
       currentStreak: newStreak,
       longestStreak: newLongestStreak,
       weeklyLessonsCompleted: weeklyLessonsCompleted,
